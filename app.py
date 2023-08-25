@@ -9,6 +9,7 @@ from langchain.vectorstores import FAISS
 from langchain.chat_models import AzureChatOpenAI
 from langchain.memory import ConversationBufferMemory, ConversationBufferWindowMemory
 from langchain.chains import ConversationalRetrievalChain
+from langchain.document_loaders import PyPDFLoader
 from htmlTemplates import css, bot_template, user_template
 from loguru import logger
 
@@ -29,27 +30,22 @@ EMBEDDING_DEPLOYMENT_NAME = os.getenv("EMBEDDING_DEPLOYMENT_NAME")
 EMBEDDING_API_TYPE = os.getenv('EMBEDDING_TYPE')
 EMBEDDING_API_VERSION = os.getenv('EMBEDDING_VERSION')
 
-def get_pdf_text(pdf_docs):
-    text = ""
-    for pdf in pdf_docs:
-        pdf_reader = PdfReader(pdf)
-        for page in pdf_reader.pages:
-            text += page.extract_text()
-    return text
+def get_pages(pdf_doc):
+    return PyPDFLoader(pdf_doc).load_and_split()
 
 
-def get_text_chunks(text):
-    text_splitter = CharacterTextSplitter(
-        separator="\n",
-        chunk_size=1000,
-        chunk_overlap=200,
-        length_function=len
-    )
-    chunks = text_splitter.split_text(text)
-    return chunks
+# def get_text_chunks(text):
+#     text_splitter = CharacterTextSplitter(
+#         separator="\n",
+#         chunk_size=1000,
+#         chunk_overlap=200,
+#         length_function=len
+#     )
+#     chunks = text_splitter.split_text(text)
+#     return chunks
 
 
-def get_vectorstore(text_chunks):
+def get_vectorstore(pages):
     embeddings = OpenAIEmbeddings(
                     openai_api_key=EMBEDDING_API_KEY,
                     openai_api_base=EMBEDDING_API_BASE,
@@ -58,7 +54,7 @@ def get_vectorstore(text_chunks):
                     deployment=EMBEDDING_DEPLOYMENT_NAME,
                     show_progress_bar=False
     )
-    vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
+    vectorstore = FAISS.from_documents(pages, embedding=embeddings)
     return vectorstore
 
 
@@ -116,17 +112,17 @@ def main():
 
     with st.sidebar:
         st.subheader("Your documents")
-        pdf_docs = st.file_uploader("Upload your PDF here and click on 'Start'")
+        pdf_doc = st.file_uploader("Upload your PDF here and click on 'Start'")
         if st.button("Start"):
             with st.spinner("Processing PDF"):
                 # get pdf text
-                raw_text = get_pdf_text(pdf_docs)
+                pages = get_pages(pdf_doc)
 
-                # get the text chunks
-                text_chunks = get_text_chunks(raw_text)
+                # # get the text chunks
+                # text_chunks = get_text_chunks(raw_text)
 
                 # create vector store
-                vectorstore = get_vectorstore(text_chunks)
+                vectorstore = get_vectorstore(pages)
 
                 # create conversation chain
                 st.session_state.conversation = get_conversation_chain(vectorstore)

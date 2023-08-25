@@ -98,18 +98,17 @@ def handle_userinput(user_question):
 # uploader stores pdf document in memory, but langchain wants the file saved to disk
 def get_file_path(pdf_doc):
     if pdf_doc is not None:
-        tempdir = Path(tempfile.TemporaryDirectory())
         file_details = {"FileName":pdf_doc.name,"FileType":pdf_doc.type}
-        st.write(file_details)
-
         file_path = tempdir / pdf_doc.name
+        st.write(file_details)
         st.write(file_path.resolve())
+        logger.debug(pdf_doc.getbuffer())
         with open(file_path, "wb") as f:
             f.write(pdf_doc.getbuffer())
         return file_path.resolve()
 
 
-def main():
+def main(tempdir):
     load_dotenv()
     st.set_page_config(page_title="Retrieval Augmented Generation")
     st.write(css, unsafe_allow_html=True)
@@ -127,7 +126,7 @@ def main():
     with st.sidebar:
         st.subheader("Your documents")
         pdf_doc = st.file_uploader("Upload your PDF here and click on 'Start'")
-        file_path = get_file_path(pdf_doc)
+        file_path = get_file_path(pdf_doc, tempdir)
         if st.button("Start"):
             with st.spinner("Processing PDF"):
                 # get pdf text
@@ -146,4 +145,5 @@ def main():
 if __name__ == '__main__':
     logger.add(sys.stderr, format="{time} {level} {message}", level="DEBUG")
     logger.add(sys.stdout, colorize=True, format="<green>{time}</green> <level>{message}</level>", level="DEBUG")
-    main()
+    tempdir = Path(tempfile.TemporaryDirectory())
+    main(tempdir)

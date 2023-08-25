@@ -1,4 +1,4 @@
-import json, os
+import json, os, sys
 from pathlib import Path
 import streamlit as st
 from dotenv import load_dotenv
@@ -129,4 +129,6 @@ def main():
 
 
 if __name__ == '__main__':
+    logger.add(sys.stderr, format="{time} {level} {message}", level="DEBUG")
+    logger.add(sys.stdout, colorize=True, format="<green>{time}</green> <level>{message}</level>", level="DEBUG")
     main()

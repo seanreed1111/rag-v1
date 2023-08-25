@@ -51,8 +51,7 @@ def get_vectorstore(pages):
                     openai_api_base=EMBEDDING_API_BASE,
                     openai_api_type=EMBEDDING_API_TYPE,
                     openai_api_version = EMBEDDING_API_VERSION,
-                    deployment=EMBEDDING_DEPLOYMENT_NAME,
-                    show_progress_bar=False
+                    deployment=EMBEDDING_DEPLOYMENT_NAME
     )
     vectorstore = FAISS.from_documents(pages, embedding=embeddings)
     return vectorstore
@@ -119,7 +118,7 @@ def get_pages(pdf_doc):
             logger.debug(json.dumps(file_path))
             with open(file_path, "wb") as f:
                 f.write(bytes_data)
-            return PyPDFLoader([file_path]).load_and_split()
+            return PyPDFLoader(file_path).load_and_split()
         else:
             st.write("NO DATA SAVED")
 

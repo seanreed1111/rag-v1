@@ -113,9 +113,12 @@ def get_pages(pdf_doc):
         bytes_data = pdf_doc.read()
         if bytes_data:
             st.write(bytes_data)
-            file_path = Path(Path.cwd(), "tmp", pdf_doc.name)
+            temp_dir  = Path.cwd() / "tmp"
+            temp_dir.mkdir(exist_ok=True)
+            file_path = temp_dir / pdf_doc.name
+            logger.debug(json.dumps(file_path))
             with open(file_path, "wb") as f:
-                f.write(bytes_data)  # write this content elsewhere
+                f.write(bytes_data)
             return PyPDFLoader(file_path).load_and_split()
         else:
             st.write("NO DATA SAVED")

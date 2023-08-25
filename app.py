@@ -99,7 +99,9 @@ def handle_userinput(user_question):
 def get_file_path(pdf_doc):
     if pdf_doc is not None:
         file_details = {"FileName":pdf_doc.name,"FileType":pdf_doc.type}
-        file_path = tempdir / pdf_doc.name
+        cwd = Path.cwd()
+        temp = cwd / "temp"
+        file_path = temp / pdf_doc.name
         st.write(file_details)
         st.write(file_path.resolve())
         logger.debug(pdf_doc.getbuffer())
@@ -108,7 +110,7 @@ def get_file_path(pdf_doc):
         return file_path.resolve()
 
 
-def main(tempdir):
+def main():
     load_dotenv()
     st.set_page_config(page_title="Retrieval Augmented Generation")
     st.write(css, unsafe_allow_html=True)
@@ -126,7 +128,7 @@ def main(tempdir):
     with st.sidebar:
         st.subheader("Your documents")
         pdf_doc = st.file_uploader("Upload your PDF here and click on 'Start'")
-        file_path = get_file_path(pdf_doc, tempdir)
+        file_path = get_file_path(pdf_doc)
         if st.button("Start"):
             with st.spinner("Processing PDF"):
                 # get pdf text
@@ -145,5 +147,4 @@ def main(tempdir):
 if __name__ == '__main__':
     logger.add(sys.stderr, format="{time} {level} {message}", level="DEBUG")
     logger.add(sys.stdout, colorize=True, format="<green>{time}</green> <level>{message}</level>", level="DEBUG")
-    tempdir = Path(tempfile.TemporaryDirectory())
-    main(tempdir)
+    main()

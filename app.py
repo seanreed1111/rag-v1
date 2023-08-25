@@ -32,7 +32,11 @@ EMBEDDING_API_TYPE = os.getenv('EMBEDDING_TYPE')
 EMBEDDING_API_VERSION = os.getenv('EMBEDDING_VERSION')
 
 def get_pages(pdf_doc):
-    return PyPDFLoader(pdf_doc).load_and_split()
+        bytes_data = pdf_doc.read()
+        file_path = Path(Path.cwd(), "tmp", pdf_doc.name)
+        with open(file_path, "wb") as f:
+            f.write(bytes_data)  # write this content elsewhere
+        return PyPDFLoader(file_path).load_and_split()
 
 
 # def get_text_chunks(text):
@@ -96,18 +100,18 @@ def handle_userinput(user_question):
                 "{{MSG}}", message.content), unsafe_allow_html=True)
 
 # uploader stores pdf document in memory, but langchain wants the file saved to disk
-def get_file_path(pdf_doc):
-    if pdf_doc is not None:
-        file_details = {"FileName":pdf_doc.name,"FileType":pdf_doc.type}
-        cwd = Path.cwd()
-        temp = cwd / "temp"
-        file_path = temp / pdf_doc.name
-        st.write(file_details)
-        st.write(file_path.resolve())
-        logger.debug(pdf_doc.getbuffer())
-        with open(file_path, "wb") as f:
-            f.write(pdf_doc.getbuffer())
-        return file_path.resolve()
+# def get_file_path(pdf_doc):
+#     if pdf_doc is not None:
+#         file_details = {"FileName":pdf_doc.name,"FileType":pdf_doc.type}
+#         cwd = Path.cwd()
+#         temp = cwd / "temp"
+#         file_path = temp / pdf_doc.name
+#         st.write(file_details)
+#         st.write(file_path.resolve())
+#         logger.debug(pdf_doc.getbuffer())
+#         with open(file_path, "wb") as f:
+#             f.write(pdf_doc.getbuffer())
+#         return file_path.resolve()
 
 
 def main():
@@ -127,8 +131,8 @@ def main():
 
     with st.sidebar:
         st.subheader("Your documents")
-        pdf_doc = st.file_uploader("Upload your PDF here and click on 'Start'")
-        file_path = get_file_path(pdf_doc)
+        pdf_doc = st.file_uploader("Upload your PDF here and click on 'Start'", type='pdf')
+
         if st.button("Start"):
             with st.spinner("Processing PDF"):
                 # get pdf text

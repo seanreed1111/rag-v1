@@ -32,20 +32,9 @@ EMBEDDING_API_TYPE = os.getenv('EMBEDDING_TYPE')
 EMBEDDING_API_VERSION = os.getenv('EMBEDDING_VERSION')
 
 
-
-
-# def get_text_chunks(text):
-#     text_splitter = CharacterTextSplitter(
-#         separator="\n",
-#         chunk_size=1000,
-#         chunk_overlap=200,
-#         length_function=len
-#     )
-#     chunks = text_splitter.split_text(text)
-#     return chunks
-
-
+@logger.catch
 def get_vectorstore(pages):
+    logger.debug("entering get_vectorstore")
     embeddings = OpenAIEmbeddings(
                     openai_api_key=EMBEDDING_API_KEY,
                     openai_api_base=EMBEDDING_API_BASE,
@@ -56,8 +45,9 @@ def get_vectorstore(pages):
     vectorstore = FAISS.from_documents(pages, embedding=embeddings)
     return vectorstore
 
-
+@logger.catch
 def get_conversation_chain(vectorstore):
+    logger.debug("entering get_conversation_chain")
     chat = AzureChatOpenAI(
                     openai_api_key=OPENAI_API_KEY,
                     openai_api_base=OPENAI_API_BASE,
@@ -80,8 +70,9 @@ def get_conversation_chain(vectorstore):
     )
     return conversation_chain
 
-
+@logger.catch
 def handle_userinput(user_question):
+    logger.debug("entering handle_userinput")
     response = st.session_state.conversation({'question': user_question})
     st.session_state.chat_history = response['chat_history']
 
@@ -93,22 +84,12 @@ def handle_userinput(user_question):
             st.write(bot_template.replace(
                 "{{MSG}}", message.content), unsafe_allow_html=True)
 
-# uploader stores pdf document in memory, but langchain wants the file saved to disk
-# def get_file_path(pdf_doc):
-#     if pdf_doc is not None:
-#         file_details = {"FileName":pdf_doc.name,"FileType":pdf_doc.type}
-#         cwd = Path.cwd()
-#         temp = cwd / "temp"
-#         file_path = temp / pdf_doc.name
-#         st.write(file_details)
-#         st.write(file_path.resolve())
-#         logger.debug(pdf_doc.getbuffer())
-#         with open(file_path, "wb") as f:
-#             f.write(pdf_doc.getbuffer())
-#         return file_path.resolve()
+
 
 #st.uploader saves the file in memory, need it saved to disk in tmp dir
+@logger.catch
 def get_pages(pdf_doc):
+        logger.debug("entering get_pages")
         bytes_data = pdf_doc.read()
         if bytes_data:
             st.write(bytes_data)
@@ -122,7 +103,9 @@ def get_pages(pdf_doc):
         else:
             st.write("NO DATA SAVED")
 
+@logger.catch
 def main():
+    logger.debug("entering main")
     load_dotenv()
     st.set_page_config(page_title="Retrieval Augmented Generation")
     st.write(css, unsafe_allow_html=True)

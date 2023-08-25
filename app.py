@@ -1,8 +1,9 @@
-import json, os, sys
+# https://github.com/seanreed1111/rag-v1.git
+import json, os, sys, tempfile
 from pathlib import Path
 import streamlit as st
 from dotenv import load_dotenv
-from PyPDF2 import PdfReader
+# from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
@@ -94,6 +95,19 @@ def handle_userinput(user_question):
             st.write(bot_template.replace(
                 "{{MSG}}", message.content), unsafe_allow_html=True)
 
+# uploader stores pdf document in memory, but langchain wants the file saved to disk
+def get_file_path(pdf_doc):
+    if pdf_doc is not None:
+        tempdir = Path(tempfile.TemporaryDirectory())
+        file_details = {"FileName":pdf_doc.name,"FileType":pdf_doc.type}
+        st.write(file_details)
+
+        file_path = tempdir / pdf_doc.name
+        st.write(file_path.resolve())
+        with open(file_path, "wb") as f:
+            f.write(pdf_doc.getbuffer())
+        return file_path.resolve()
+
 
 def main():
     load_dotenv()
@@ -113,6 +127,7 @@ def main():
     with st.sidebar:
         st.subheader("Your documents")
         pdf_doc = st.file_uploader("Upload your PDF here and click on 'Start'")
+        file_path = get_file_path(pdf_doc)
         if st.button("Start"):
             with st.spinner("Processing PDF"):
                 # get pdf text

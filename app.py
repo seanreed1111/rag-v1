@@ -31,12 +31,7 @@ EMBEDDING_DEPLOYMENT_NAME = os.getenv("EMBEDDING_DEPLOYMENT_NAME")
 EMBEDDING_API_TYPE = os.getenv('EMBEDDING_TYPE')
 EMBEDDING_API_VERSION = os.getenv('EMBEDDING_VERSION')
 
-def get_pages(pdf_doc):
-        bytes_data = pdf_doc.read()
-        file_path = Path(Path.cwd(), "tmp", pdf_doc.name)
-        with open(file_path, "wb") as f:
-            f.write(bytes_data)  # write this content elsewhere
-        return PyPDFLoader(file_path).load_and_split()
+
 
 
 # def get_text_chunks(text):
@@ -113,6 +108,13 @@ def handle_userinput(user_question):
 #             f.write(pdf_doc.getbuffer())
 #         return file_path.resolve()
 
+#st.uploader saves the file in memory, need it saved to disk in tmp dir
+def get_pages(pdf_doc):
+        bytes_data = pdf_doc.read()
+        file_path = Path(Path.cwd(), "tmp", pdf_doc.name)
+        with open(file_path, "wb") as f:
+            f.write(bytes_data)  # write this content elsewhere
+        return PyPDFLoader(file_path).load_and_split()
 
 def main():
     load_dotenv()

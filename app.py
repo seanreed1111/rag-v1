@@ -111,10 +111,14 @@ def handle_userinput(user_question):
 #st.uploader saves the file in memory, need it saved to disk in tmp dir
 def get_pages(pdf_doc):
         bytes_data = pdf_doc.read()
-        file_path = Path(Path.cwd(), "tmp", pdf_doc.name)
-        with open(file_path, "wb") as f:
-            f.write(bytes_data)  # write this content elsewhere
-        return PyPDFLoader(file_path).load_and_split()
+        if bytes_data:
+            st.write(bytes_data)
+            file_path = Path(Path.cwd(), "tmp", pdf_doc.name)
+            with open(file_path, "wb") as f:
+                f.write(bytes_data)  # write this content elsewhere
+            return PyPDFLoader(file_path).load_and_split()
+        else:
+            st.write("NO DATA SAVED")
 
 def main():
     load_dotenv()

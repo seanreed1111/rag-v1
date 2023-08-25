@@ -24,6 +24,7 @@ DEPLOYMENT_NAME = os.getenv("DEPLOYMENT_NAME")
 MODEL_NAME = os.getenv("MODEL_NAME")
 TEMPERATURE = 0
 
+logger.debug()
 # embedding variables
 EMBEDDING_API_BASE = os.getenv("EMBEDDING_API_BASE")
 EMBEDDING_API_KEY = os.getenv("EMBEDDING_API_KEY")
@@ -40,7 +41,8 @@ def get_vectorstore(pages):
                     openai_api_base=EMBEDDING_API_BASE,
                     openai_api_type=EMBEDDING_API_TYPE,
                     openai_api_version=EMBEDDING_API_VERSION,
-                    deployment=EMBEDDING_DEPLOYMENT_NAME
+                    deployment=EMBEDDING_DEPLOYMENT_NAME,
+                    chunk_size=16
     )
     vectorstore = FAISS.from_documents(pages, embedding=embeddings)
     return vectorstore

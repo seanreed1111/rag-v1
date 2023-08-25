@@ -39,7 +39,7 @@ def get_vectorstore(pages):
                     openai_api_key=EMBEDDING_API_KEY,
                     openai_api_base=EMBEDDING_API_BASE,
                     openai_api_type=EMBEDDING_API_TYPE,
-                    openai_api_version = EMBEDDING_API_VERSION,
+                    openai_api_version=EMBEDDING_API_VERSION,
                     deployment=EMBEDDING_DEPLOYMENT_NAME
     )
     vectorstore = FAISS.from_documents(pages, embedding=embeddings)
@@ -53,7 +53,7 @@ def get_conversation_chain(vectorstore):
                     openai_api_base=OPENAI_API_BASE,
                     openai_api_type=OPENAI_API_TYPE,
                     openai_api_version=OPENAI_API_VERSION,
-                    model_name=MODEL_NAME,
+                    # model_name=MODEL_NAME,
                     deployment=DEPLOYMENT_NAME,
                     temperature=TEMPERATURE,
                     request_timeout=20
